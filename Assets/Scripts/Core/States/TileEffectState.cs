@@ -2,6 +2,7 @@ using UnityEngine;
 using ChronosAndCards.Interfaces;
 using ChronosAndCards.Data;
 using ChronosAndCards.Gameplay.Board;
+using ChronosAndCards.Gameplay;
 
 namespace ChronosAndCards.Core.States
 {
@@ -11,30 +12,39 @@ namespace ChronosAndCards.Core.States
     public class TileEffectState : IGameState
     {
         private readonly GameManager _gameManager;
+        private readonly BoardManager _boardManager;
         private bool _effectApplied;
 
-        /// <summary>Constructor que inyecta el GameManager.</summary>
-        public TileEffectState(GameManager gameManager)
+        /// <summary>Constructor que inyecta GameManager y BoardManager.</summary>
+        public TileEffectState(GameManager gameManager, BoardManager boardManager)
         {
             _gameManager = gameManager;
+            _boardManager = boardManager;
         }
 
         public void Enter()
         {
             Debug.Log("TileEffectState: Enter");
 
-            IPlayer player = _gameManager.GameContext.CurrentPlayer;
-            ITile tile = null;
-
-            if (_gameManager.BoardManager != null)
+            TurnContext turnContext = _gameManager.TurnContext;
+            IPlayer player = turnContext.ActivePlayer;
+            if (player == null)
             {
-                tile = _gameManager.BoardManager.GetPlayerTile(player);
+                player = _gameManager.GameContext.CurrentPlayer;
+                turnContext.ActivePlayer = player;
+            }
+
+            ITile tile = null;
+            if (_boardManager != null)
+            {
+                tile = _boardManager.GetPlayerTile(player);
             }
 
             if (tile != null)
             {
                 // Invocar el efecto de caída
                 tile.OnPlayerLanded(player);
+                GameEvents.OnTileEffectApplied?.Invoke(player, tile.Type);
             }
             else
             {
@@ -43,6 +53,7 @@ namespace ChronosAndCards.Core.States
                 TileType resolvedType = (TileType)(player.Position % 5);
                 tile = new TestTile(resolvedType);
                 tile.OnPlayerLanded(player);
+                GameEvents.OnTileEffectApplied?.Invoke(player, resolvedType);
             }
 
             _effectApplied = true;

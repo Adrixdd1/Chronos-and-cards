@@ -27,6 +27,28 @@ namespace ChronosAndCards.Core
         /// <summary>Indica si el jugador debe perder su siguiente turno por penalización.</summary>
         bool IsSkipNextTurn { get; }
 
+        /// <summary>Lista de efectos de estado activos sobre el jugador.</summary>
+        IReadOnlyList<IStatusEffect> ActiveEffects { get; }
+
+        /// <summary>
+        /// Añade un efecto de estado al jugador.
+        /// </summary>
+        /// <param name="effect">Efecto a añadir.</param>
+        void AddStatusEffect(IStatusEffect effect);
+
+        /// <summary>
+        /// Remueve un efecto de estado del jugador.
+        /// </summary>
+        /// <param name="effect">Efecto a remover.</param>
+        void RemoveStatusEffect(IStatusEffect effect);
+
+        /// <summary>
+        /// Verifica si el jugador posee un efecto de estado de tipo T.
+        /// </summary>
+        /// <typeparam name="T">El tipo de efecto de estado a buscar.</typeparam>
+        /// <returns>True si posee el efecto.</returns>
+        bool HasStatusEffect<T>() where T : IStatusEffect;
+
         /// <summary>
         /// Hace avanzar al jugador una cantidad relativa de casillas en el tablero.
         /// </summary>

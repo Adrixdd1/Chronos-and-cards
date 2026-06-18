@@ -97,3 +97,59 @@ Este documento detalla los escenarios de prueba manuales y los criterios de acep
   - El intercambio que involucra la casilla de Inicio o Meta debe ser **rechazado** con un log de error/advertencia.
   - El intercambio a distancias mayores a las permitidas (distancia > 2 en lineal, o no adyacentes en exploración) debe ser **rechazado**.
   - Los intercambios válidos deben completarse, actualizar sus índices internos, disparar el evento `GameEvents.OnBoardModified` y reposicionar a cualquier jugador presente en los casilleros modificados.
+
+---
+
+### 7. Lanzamiento y Animación Física del Dado (HU-3.3 & HU-3.4)
+* **Objetivo:** Verificar que el dado 3D físico simula el lanzamiento en la escena y se orienta suavemente a la cara predeterminada por la lógica RNG.
+* **Pasos:**
+  1. En una escena con gravedad y colisionadores de suelo (`DiceFloor`), lanza el dado invocando `AnimateToResult(targetValue)` para cada valor del 1 al 6.
+  2. Observa el impulso de fuerza vertical y el torque aleatorio aplicados en el inicio.
+  3. Observa cómo el dado desacelera por rozamiento físico y, al cruzar el umbral `StopThreshold`, realiza el acomodo (`Slerp`) a la orientación de la cara objetivo.
+* **Resultado Esperado:**
+  - El dado debe experimentar fuerzas físicas (saltar y rotar) en cada lanzamiento.
+  - Al detenerse, el dado debe quedar orientado con la cara especificada (`targetValue`) apuntando hacia arriba.
+  - La interpolación de la rotación hacia la cara correcta debe ser fluida e imperceptible, evitando snaps toscos.
+  - Se debe disparar el evento `OnDiceAnimationComplete` cuando la rotación final se asiente.
+
+---
+
+### 8. Activación de Timeout de Físicas (HU-3.3)
+* **Objetivo:** Verificar la existencia de la red de seguridad (`AnimationTimeout`) si el dado físico queda atascado o vibra indefinidamente.
+* **Pasos:**
+  1. Abre el preset `DiceConfig_Default` y ajusta `MaxRollDuration` a un valor bajo (ej. 1 segundo) y `AnimationTimeout` a 3 segundos.
+  2. Lanza el dado en un espacio cerrado donde no pueda dejar de rebotar (ej. atrapado entre colliders estrechos).
+  3. Monitorea el tiempo transcurrido desde el lanzamiento.
+* **Resultado Esperado:**
+  - Si el dado no se detiene físicamente tras 1 segundo (superando `MaxRollDuration`), el sistema debe forzar el settle desactivando las físicas del rigidbody (`isKinematic = true`).
+  - Si el settle se bloquea por completo, a los 3 segundos (`AnimationTimeout`) el sistema debe forzar la orientación final del dado de forma instantánea y gatillar `OnDiceAnimationComplete` de manera segura, evitando bloquear el ciclo de juego.
+
+---
+
+### 9. Mapeo de Dificultad Dinámica del Dado (HU-3.5)
+* **Objetivo:** Verificar que el `DifficultyMapper` mapea correctamente los números del dado a niveles de dificultad, respetando los presets personalizados del inspector.
+* **Pasos:**
+  1. En el Unity Editor, crea un asset `DifficultyMapConfig` alternativo (ej. `DifficultyMap_Easy.asset`) y configúralo con el mapa `{ 1, 1, 2, 3, 4, 5 }` (sesgando los dados 1 y 2 a dificultad de carta nivel 1).
+  2. Asigna este config al `DifficultyMapper` y simula lanzamientos de dado del 1 al 6.
+  3. Ejecuta los mismos pasos con el config por defecto `{ 1, 2, 3, 4, 5, 6 }`.
+* **Resultado Esperado:**
+  - Con el preset fácil: un dado con valor 1 debe mapear a dificultad 1, un dado con valor 2 debe mapear a dificultad 1, y un dado con valor 6 a dificultad 5.
+  - Con el preset por defecto: el mapeo debe ser directo e idéntico 1:1 (dado 1 -> dificultad 1, ..., dado 6 -> dificultad 6).
+  - Al ingresar un dado fuera del rango 1-6 (ej. 0 o 7), se debe lanzar un error `ArgumentOutOfRangeException`.
+
+---
+
+### 10. Integración de Flujo de Turno y Respuestas (HU-3.9)
+* **Objetivo:** Verificar que la FSM avanza por todas las fases del turno al recibir inputs de respuesta desde la UI y aplica correctamente las fórmulas de avance.
+* **Pasos:**
+  1. Inicia la FSM de prueba.
+  2. Cuando el flujo llegue a `ResolutionState`, el juego debe pausarse esperando respuesta.
+  3. Simula la entrega de la respuesta correcta enviando la respuesta exacta mediante el evento `GameEvents.OnAnswerSubmitted` (o `SubmitAnswer` en el estado).
+  4. Repite el flujo simulando:
+     - Una respuesta correcta utilizando pistas (`UsedHint = true`).
+     - Una respuesta incorrecta (`Fail`).
+* **Resultado Esperado:**
+  - Si la respuesta es correcta y no se usó ayuda, la fórmula calcula avance x1.0, el jugador se mueve en el tablero la distancia total del dado, y se transiciona a `TileEffectState`.
+  - Si es correcta con ayuda, la fórmula calcula avance x0.5 (redondeando el avance del dado a la mitad) y se transiciona.
+  - Si la respuesta es incorrecta, el avance es 0 (o retroceso si aplica una penalización), se habilita la ventana para usar items tras fallo, y se pasa al estado de efectos de casilla.
+

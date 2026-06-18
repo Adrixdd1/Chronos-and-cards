@@ -33,6 +33,9 @@ namespace ChronosAndCards.Core
         /// <summary>Se dispara al resolver la respuesta del jugador.</summary>
         public static Action<IPlayer, PerformanceMultiplier> OnQuestionResolved;
 
+        /// <summary>Se dispara cuando el jugador envía su respuesta desde la UI.</summary>
+        public static Action<string> OnAnswerSubmitted;
+
         // === Movimiento ===
         /// <summary>Se dispara al mover un jugador en el tablero. Parámetros: jugador, posición origen, posición destino.</summary>
         public static Action<IPlayer, int, int> OnPlayerMoved;
@@ -120,6 +123,7 @@ namespace ChronosAndCards.Core
             OnDuelEnded = null;
             OnGameStarted = null;
             OnGameOver = null;
+            OnAnswerSubmitted = null;
         }
     }
 }

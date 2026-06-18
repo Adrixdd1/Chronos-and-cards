@@ -1,5 +1,6 @@
 using UnityEngine;
 using ChronosAndCards.Data;
+using ChronosAndCards.Gameplay.Dice;
 
 namespace ChronosAndCards.Core.States
 {
@@ -10,32 +11,58 @@ namespace ChronosAndCards.Core.States
     public class CardDrawState : IGameState
     {
         private readonly GameManager _gameManager;
+        private readonly IDifficultyMapper _difficultyMapper;
+        private readonly ContentManager _contentManager;
         private bool _drawCompleted;
 
-        /// <summary>Constructor que inyecta el GameManager.</summary>
-        public CardDrawState(GameManager gameManager)
+        /// <summary>Constructor que inyecta GameManager, DifficultyMapper y ContentManager.</summary>
+        public CardDrawState(GameManager gameManager, IDifficultyMapper difficultyMapper, ContentManager contentManager)
         {
             _gameManager = gameManager;
+            _difficultyMapper = difficultyMapper;
+            _contentManager = contentManager;
         }
 
         public void Enter()
         {
             Debug.Log("CardDrawState: Enter");
 
-            int diceValue = _gameManager.GameContext.CurrentDiceValue;
-            int difficultyLevel = MapDiceToDifficulty(diceValue);
-
-            CardData card = new CardData(1, "Stub Question", null, null, "Answer", false);
-            if (_gameManager.ContentManager != null)
+            int diceValue = _gameManager.TurnContext.DiceValue;
+            
+            // Mapear dificultad
+            int difficultyLevel = 1;
+            if (_difficultyMapper != null)
             {
-                card = _gameManager.ContentManager.DrawCard(difficultyLevel);
+                difficultyLevel = _difficultyMapper.GetDifficulty(diceValue);
+            }
+            else
+            {
+                difficultyLevel = Mathf.Clamp(diceValue, 1, 6);
+            }
+
+            // Sabotaje: fuerza dificultad a 6
+            if (_gameManager.TurnContext.IsSabotaged)
+            {
+                difficultyLevel = 6;
+            }
+
+            _gameManager.TurnContext.DifficultyLevel = difficultyLevel;
+
+            CardData card;
+            if (_contentManager != null)
+            {
+                card = _contentManager.DrawCard(difficultyLevel);
             }
             else
             {
                 Debug.LogWarning("CardDrawState: ContentManager no está asignado. Usando carta stub.");
+                card = new CardData(1, "Stub Question", null, null, "Answer", false);
             }
 
-            // Guardar en el contexto
+            // Guardar en el TurnContext
+            _gameManager.TurnContext.CurrentCard = card;
+
+            // Guardar en el GameContext para flujos/UI retrocompatibles
             _gameManager.GameContext.CurrentCard = card;
 
             // Emitir evento
@@ -48,22 +75,14 @@ namespace ChronosAndCards.Core.States
         {
             if (_drawCompleted)
             {
-                _gameManager.TransitionTo(new States.ResolutionState(_gameManager));
+                // Transiciona a ResolutionState recibiendo el TurnContext
+                _gameManager.TransitionTo(new States.ResolutionState(_gameManager, _gameManager.TurnContext));
             }
         }
 
         public void Exit()
         {
             Debug.Log("CardDrawState: Exit");
-        }
-
-        /// <summary>
-        /// Mapea el valor del dado D6 (1–6) a un nivel de dificultad de pregunta.
-        /// </summary>
-        private int MapDiceToDifficulty(int diceValue)
-        {
-            // Mapeo simple: el valor del dado es el nivel de dificultad, acotado entre 1 y 6
-            return Mathf.Clamp(diceValue, 1, 6);
         }
     }
 }

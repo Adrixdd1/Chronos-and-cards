@@ -1,6 +1,7 @@
 using UnityEngine;
 using ChronosAndCards.Data;
 using ChronosAndCards.Gameplay.Board;
+using ChronosAndCards.Gameplay;
 
 namespace ChronosAndCards.Core.States
 {
@@ -11,50 +12,75 @@ namespace ChronosAndCards.Core.States
     public class MovementState : IGameState
     {
         private readonly GameManager _gameManager;
+        private readonly AdvanceCalculator _advanceCalculator;
+        private readonly BoardManager _boardManager;
 
-        /// <summary>Constructor que inyecta el GameManager.</summary>
-        public MovementState(GameManager gameManager)
+        /// <summary>Constructor que inyecta GameManager, AdvanceCalculator y BoardManager.</summary>
+        public MovementState(GameManager gameManager, AdvanceCalculator advanceCalculator, BoardManager boardManager)
         {
             _gameManager = gameManager;
+            _advanceCalculator = advanceCalculator;
+            _boardManager = boardManager;
         }
 
         public void Enter()
         {
             Debug.Log("MovementState: Enter");
 
-            IPlayer player = _gameManager.GameContext.CurrentPlayer;
-            int diceValue = _gameManager.GameContext.CurrentDiceValue;
-            PerformanceMultiplier multiplier = _gameManager.GameContext.LastResult;
+            TurnContext turnContext = _gameManager.TurnContext;
+            IPlayer player = turnContext.ActivePlayer;
 
-            // Calcular avance según la fórmula: (dado * multiplicador) / 100
-            int tilesToMove = (diceValue * (int)multiplier) / 100;
-            Debug.Log($"MovementState: {player.PlayerName} avanza {tilesToMove} casillas (Dado: {diceValue}, Desempeño: {multiplier}).");
-
-            int fromPosition = player.Position;
-
-            // Mover en el BoardManager
-            if (_gameManager.BoardManager != null)
+            // En caso de fallbacks/safety checks
+            if (player == null)
             {
-                _gameManager.BoardManager.MovePlayer(player, tilesToMove);
+                player = _gameManager.GameContext.CurrentPlayer;
+                turnContext.ActivePlayer = player;
+            }
+
+            int diceValue = turnContext.DiceValue;
+            PerformanceMultiplier performance = turnContext.PerformanceResult;
+
+            // Registrar posición de origen
+            turnContext.OriginPosition = player.Position;
+
+            // Calcular avance
+            int tilesToMove = 0;
+            if (_advanceCalculator != null)
+            {
+                tilesToMove = _advanceCalculator.Calculate(diceValue, performance);
             }
             else
             {
-                // Si no hay BoardManager, mover manualmente
+                tilesToMove = (diceValue * (int)performance) / 100;
+            }
+
+            turnContext.TilesToMove = tilesToMove;
+            Debug.Log($"MovementState: {player.PlayerName} avanza {tilesToMove} casillas (Dado: {diceValue}, Desempeño: {performance}).");
+
+            // Ejecutar movimiento en el BoardManager
+            if (_boardManager != null)
+            {
+                _boardManager.MovePlayer(player, tilesToMove);
+            }
+            else
+            {
+                // Fallback si no hay BoardManager
                 player.MoveForward(tilesToMove);
             }
 
-            int toPosition = player.Position;
+            // Registrar posición de destino
+            turnContext.DestinationPosition = player.Position;
 
             // Emitir evento
-            GameEvents.OnPlayerMoved?.Invoke(player, fromPosition, toPosition);
+            GameEvents.OnPlayerMoved?.Invoke(player, turnContext.OriginPosition, turnContext.DestinationPosition);
         }
 
         public void Tick()
         {
             // Esperar si hay una bifurcación pendiente de decisión
-            if (_gameManager.BoardManager == null || !_gameManager.BoardManager.IsMovementPending)
+            if (_boardManager == null || !_boardManager.IsMovementPending)
             {
-                _gameManager.TransitionTo(new TileEffectState(_gameManager));
+                _gameManager.TransitionTo(new TileEffectState(_gameManager, _boardManager));
             }
         }
 

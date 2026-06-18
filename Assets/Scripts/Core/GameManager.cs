@@ -4,6 +4,7 @@ using ChronosAndCards.Data;
 using ChronosAndCards.Interfaces;
 using ChronosAndCards.Gameplay;
 using ChronosAndCards.Gameplay.Board;
+using ChronosAndCards.Gameplay.Dice;
 
 namespace ChronosAndCards.Core
 {
@@ -18,6 +19,16 @@ namespace ChronosAndCards.Core
         [SerializeField] private ContentManager _contentManager;
         [SerializeField] private DiceRoller _diceRoller;
 
+        [Header("Configuraciones del Dado")]
+        [SerializeField] private DiceConfig _diceConfig;
+        [SerializeField] private DifficultyMapConfig _difficultyMapConfig;
+        [SerializeField] private DicePhysics _dicePhysics;
+
+        private DiceLogic _diceLogic;
+        private IDifficultyMapper _difficultyMapper;
+        private AdvanceCalculator _advanceCalculator;
+        private TurnContext _turnContext = new TurnContext();
+
         private IGameState _currentState;
         private Stack<IGameState> _stateStack = new Stack<IGameState>();
 
@@ -25,6 +36,21 @@ namespace ChronosAndCards.Core
         private List<IPlayer> _players = new List<IPlayer>();
         private int _currentPlayerIndex = 0;
         private GameContext _gameContext = new GameContext();
+
+        /// <summary>Acceso al TurnContext compartido.</summary>
+        public TurnContext TurnContext => _turnContext;
+
+        /// <summary>Acceso a la lógica del dado.</summary>
+        public DiceLogic DiceLogic => _diceLogic;
+
+        /// <summary>Acceso a las físicas del dado.</summary>
+        public DicePhysics DicePhysics => _dicePhysics;
+
+        /// <summary>Acceso al mapeador de dificultad.</summary>
+        public IDifficultyMapper DifficultyMapper => _difficultyMapper;
+
+        /// <summary>Acceso a la calculadora de avance.</summary>
+        public AdvanceCalculator AdvanceCalculator => _advanceCalculator;
 
         /// <summary>Acceso al BoardManager inyectado.</summary>
         public BoardManager BoardManager => _boardManager;
@@ -53,6 +79,13 @@ namespace ChronosAndCards.Core
 
         /// <summary>Retorna el stack actual de estados (interrupciones).</summary>
         public Stack<IGameState> StateStack => _stateStack;
+
+        private void Awake()
+        {
+            _diceLogic = new DiceLogic();
+            _difficultyMapper = new DifficultyMapper(_difficultyMapConfig);
+            _advanceCalculator = new AdvanceCalculator();
+        }
 
         private void Start()
         {

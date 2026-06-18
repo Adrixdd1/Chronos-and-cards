@@ -41,6 +41,10 @@ namespace ChronosAndCards.Core.States
                 return;
             }
 
+            // Resetear y actualizar TurnContext
+            _gameManager.TurnContext.Reset();
+            _gameManager.TurnContext.ActivePlayer = activePlayer;
+
             // Actualizar contexto
             _gameManager.GameContext.CurrentPlayer = activePlayer;
             _gameManager.GameContext.TargetPlayer = null;
@@ -67,7 +71,7 @@ namespace ChronosAndCards.Core.States
             // Ventana para usar ítems de fase ReplaceTurn (ej. Duelo)
             // Para la Épica 1, transicionamos directamente al estado del lanzamiento del dado (DiceRollState)
             _transitionStarted = true;
-            _gameManager.TransitionTo(new DiceRollState(_gameManager));
+            _gameManager.TransitionTo(new DiceRollState(_gameManager, _gameManager.DiceLogic, _gameManager.DicePhysics));
         }
 
         public void Exit()
