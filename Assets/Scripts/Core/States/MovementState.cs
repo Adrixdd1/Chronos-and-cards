@@ -1,5 +1,6 @@
 using UnityEngine;
 using ChronosAndCards.Data;
+using ChronosAndCards.Gameplay.Board;
 
 namespace ChronosAndCards.Core.States
 {
@@ -10,7 +11,6 @@ namespace ChronosAndCards.Core.States
     public class MovementState : IGameState
     {
         private readonly GameManager _gameManager;
-        private bool _movementCompleted;
 
         /// <summary>Constructor que inyecta el GameManager.</summary>
         public MovementState(GameManager gameManager)
@@ -47,13 +47,12 @@ namespace ChronosAndCards.Core.States
 
             // Emitir evento
             GameEvents.OnPlayerMoved?.Invoke(player, fromPosition, toPosition);
-
-            _movementCompleted = true;
         }
 
         public void Tick()
         {
-            if (_movementCompleted)
+            // Esperar si hay una bifurcación pendiente de decisión
+            if (_gameManager.BoardManager == null || !_gameManager.BoardManager.IsMovementPending)
             {
                 _gameManager.TransitionTo(new TileEffectState(_gameManager));
             }

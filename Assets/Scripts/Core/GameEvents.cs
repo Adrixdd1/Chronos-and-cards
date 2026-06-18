@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using ChronosAndCards.Data;
 using ChronosAndCards.Interfaces;
 
@@ -38,6 +39,19 @@ namespace ChronosAndCards.Core
 
         /// <summary>Se dispara al aplicar el efecto de una casilla.</summary>
         public static Action<IPlayer, TileType> OnTileEffectApplied;
+
+        // === Tablero ===
+        /// <summary>Se dispara al requerir que un jugador elija ruta en una bifurcación. Parámetros: jugador, opciones disponibles.</summary>
+        public static Action<IPlayer, IReadOnlyList<ITile>> OnPathChoiceRequired;
+
+        /// <summary>Se dispara al seleccionar el jugador una de las casillas en la bifurcación. Parámetros: jugador, casilla seleccionada.</summary>
+        public static Action<IPlayer, ITile> OnPathChoiceSelected;
+
+        /// <summary>Se dispara al modificar/intercambiar dos casillas en el tablero. Parámetros: casilla A, casilla B.</summary>
+        public static Action<ITile, ITile> OnBoardModified;
+
+        /// <summary>Se dispara cuando una casilla es descubierta progresivamente.</summary>
+        public static Action<ITile> OnTileDiscovered;
 
         // === Pistas ===
         /// <summary>Se dispara al modificar la cantidad de pistas de un jugador. Parámetros: jugador, nueva cantidad.</summary>
@@ -91,6 +105,10 @@ namespace ChronosAndCards.Core
             OnQuestionResolved = null;
             OnPlayerMoved = null;
             OnTileEffectApplied = null;
+            OnPathChoiceRequired = null;
+            OnPathChoiceSelected = null;
+            OnBoardModified = null;
+            OnTileDiscovered = null;
             OnHintChanged = null;
             OnHintRevealed = null;
             OnInventoryChanged = null;

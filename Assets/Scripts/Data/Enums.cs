@@ -70,4 +70,23 @@ namespace ChronosAndCards.Data
         /// <summary>Objeto consumido/usado.</summary>
         Used
     }
+
+    /// <summary>
+    /// Tipo de modificador temporal de reglas que aplica una casilla de Evento.
+    /// </summary>
+    public enum TileEventType
+    {
+        /// <summary>"Siguiente pista gratuita" — no reduce multiplicador.</summary>
+        FreeHint,
+        /// <summary>"Avanza N casillas extra".</summary>
+        ExtraMovement,
+        /// <summary>"Tu próximo movimiento se reduce a la mitad".</summary>
+        ReducedMovement,
+        /// <summary>"Intercambia posición con un jugador al azar".</summary>
+        SwapPositionRandom,
+        /// <summary>"Tu próxima respuesta correcta vale el doble".</summary>
+        DoubleReward,
+        /// <summary>"Avanza sin responder pregunta".</summary>
+        SkipQuestion
+    }
 }

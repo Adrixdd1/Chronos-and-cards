@@ -31,13 +31,21 @@ namespace ChronosAndCards.Core.States
             _gameManager.GameContext.CurrentPhase = Data.ItemActivationPhase.BeforeAnswer;
 
             // Inicializar managers
-            _gameManager.BoardManager?.GenerateBoard();
+            _gameManager.BoardManager?.Initialize();
             _gameManager.ContentManager?.LoadContent();
 
             // Registrar jugadores de prueba para inicializar la partida
             _gameManager.Players.Clear();
-            _gameManager.Players.Add(new TestPlayer("Player 1", 0));
-            _gameManager.Players.Add(new TestPlayer("Player 2", 1));
+            var p1 = new TestPlayer("Player 1", 0);
+            var p2 = new TestPlayer("Player 2", 1);
+            _gameManager.Players.Add(p1);
+            _gameManager.Players.Add(p2);
+            
+            if (_gameManager.BoardManager != null)
+            {
+                _gameManager.BoardManager.RegisterPlayer(p1);
+                _gameManager.BoardManager.RegisterPlayer(p2);
+            }
             _gameManager.CurrentPlayerIndex = 0;
 
             _isSetupDone = true;

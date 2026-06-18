@@ -1,6 +1,7 @@
 using UnityEngine;
 using ChronosAndCards.Interfaces;
 using ChronosAndCards.Data;
+using ChronosAndCards.Gameplay.Board;
 
 namespace ChronosAndCards.Core.States
 {
@@ -23,16 +24,26 @@ namespace ChronosAndCards.Core.States
             Debug.Log("TileEffectState: Enter");
 
             IPlayer player = _gameManager.GameContext.CurrentPlayer;
+            ITile tile = null;
 
-            // Determinar tipo de casilla determinísticamente basada en la posición
-            TileType resolvedType = (TileType)(player.Position % 5);
-            ITile tile = new TestTile(resolvedType);
+            if (_gameManager.BoardManager != null)
+            {
+                tile = _gameManager.BoardManager.GetPlayerTile(player);
+            }
 
-            // Invocar el efecto de caída
-            tile.OnPlayerLanded(player);
-
-            // Emitir evento
-            GameEvents.OnTileEffectApplied?.Invoke(player, resolvedType);
+            if (tile != null)
+            {
+                // Invocar el efecto de caída
+                tile.OnPlayerLanded(player);
+            }
+            else
+            {
+                Debug.LogWarning("TileEffectState: BoardManager no asignado o casilla no encontrada. Usando casilla de prueba.");
+                // Caída en una casilla de prueba basada en la posición
+                TileType resolvedType = (TileType)(player.Position % 5);
+                tile = new TestTile(resolvedType);
+                tile.OnPlayerLanded(player);
+            }
 
             _effectApplied = true;
         }

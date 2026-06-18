@@ -3,6 +3,7 @@ using UnityEngine;
 using ChronosAndCards.Data;
 using ChronosAndCards.Interfaces;
 using ChronosAndCards.Gameplay;
+using ChronosAndCards.Gameplay.Board;
 
 namespace ChronosAndCards.Core
 {
