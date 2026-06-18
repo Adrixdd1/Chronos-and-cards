@@ -5,6 +5,7 @@ using ChronosAndCards.Core;
 using ChronosAndCards.Core.States;
 using ChronosAndCards.Data;
 using ChronosAndCards.Gameplay;
+using ChronosAndCards.Gameplay.Board;
 
 namespace ChronosAndCards.Tests
 {
