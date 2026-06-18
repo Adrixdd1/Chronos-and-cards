@@ -32,6 +32,28 @@ namespace ChronosAndCards.Core
         public IReadOnlyList<IItem> Inventory => _inventory;
         public bool IsSkipNextTurn => _isSkipNextTurn;
 
+        private List<IStatusEffect> _activeEffects = new List<IStatusEffect>();
+        public IReadOnlyList<IStatusEffect> ActiveEffects => _activeEffects;
+
+        public void AddStatusEffect(IStatusEffect effect)
+        {
+            _activeEffects.Add(effect);
+        }
+
+        public void RemoveStatusEffect(IStatusEffect effect)
+        {
+            _activeEffects.Remove(effect);
+        }
+
+        public bool HasStatusEffect<T>() where T : IStatusEffect
+        {
+            foreach (var effect in _activeEffects)
+            {
+                if (effect is T) return true;
+            }
+            return false;
+        }
+
         public void MoveForward(int tiles)
         {
             int oldPos = _position;
