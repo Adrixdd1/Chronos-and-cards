@@ -153,3 +153,67 @@ Este documento detalla los escenarios de prueba manuales y los criterios de acep
   - Si es correcta con ayuda, la fórmula calcula avance x0.5 (redondeando el avance del dado a la mitad) y se transiciona.
   - Si la respuesta es incorrecta, el avance es 0 (o retroceso si aplica una penalización), se habilita la ventana para usar items tras fallo, y se pasa al estado de efectos de casilla.
 
+---
+
+### 11. Carga de Archivo Markdown y Reporte de Errores (HU-4.1, HU-4.2 & HU-4.3)
+* **Objetivo:** Verificar que el parser procesa archivos Markdown y reporta claramente errores y advertencias en el Inspector y consola.
+* **Pasos:**
+  1. Diseña un archivo `.md` de prueba malformado que contenga:
+     - Una pregunta sin respuesta (`=`).
+     - Una pregunta con dificultad no numérica o fuera de rango (ej. `[9]`).
+     - Una línea no reconocida de texto plano.
+  2. Carga este archivo en runtime usando el campo de ruta configurable del `ContentLoader` o a través del selector de archivos en el Editor.
+  3. Revisa la Consola de Unity para el resumen del `ParseResult`.
+* **Resultado Esperado:**
+  - La consola debe imprimir un log de error detallando la línea exacta y la razón del fallo por cada pregunta descartada.
+  - Las advertencias (warnings) deben indicar líneas con opciones duplicadas o líneas no reconocidas omitidas, pero permitir cargar el resto de preguntas válidas.
+  - El sistema no debe cargar el mazo si el conteo de cartas utilizables es 0.
+
+---
+
+### 12. Barajado del Mazo y Fallback de Dificultad por Proximidad (HU-4.4 & HU-4.5)
+* **Objetivo:** Verificar que el mazo de cartas se baraja y proporciona un fallback consistente si una dificultad específica se agota.
+* **Pasos:**
+  1. Genera un archivo `.md` con 2 cartas de nivel 1 y ninguna de nivel 2.
+  2. Carga las preguntas y simula 3 extracciones sucesivas de nivel 2.
+* **Resultado Esperado:**
+  - Las primeras 2 extracciones de dificultad 2 deben retornar las cartas de nivel 1 (fallback por proximidad descendente N-1).
+  - La consola debe loguear un Warning advirtiendo que el nivel 2 está agotado y se usó un fallback.
+  - La tercera extracción (estando todo agotado) debe retornar la carta vacía de emergencia ("No hay más preguntas disponibles...").
+
+---
+
+### 13. Consumo de Pistas en Resolución de Preguntas (HU-4.6)
+* **Objetivo:** Verificar que el uso de pistas reduce el multiplicador y altera los recursos del jugador activo.
+* **Pasos:**
+  1. Inicia una sesión donde el jugador activo posea 2 pistas y caiga en una carta con pista definida.
+  2. Haz clic en "Usar Pista" durante el `ResolutionState`.
+* **Resultado Esperado:**
+  - El contador de pistas del jugador debe disminuir a 1.
+  - Se debe disparar `GameEvents.OnHintRevealed` con el texto de la pista.
+  - Si el jugador responde correctamente tras usar la pista, su avance debe ser multiplicado por x0.5 (multiplicador `WithHelp`), a menos que tenga activo el efecto de `IsOverdriveActive`.
+
+---
+
+### 14. Revelación de Opciones Múltiples (HU-4.7)
+* **Objetivo:** Verificar que revelar las opciones disponibles en la UI penaliza el multiplicador del jugador.
+* **Pasos:**
+  1. Durante la pregunta en `ResolutionState`, haz clic en "Ver Opciones" para la carta actual.
+  2. Responde la pregunta correctamente.
+* **Resultado Esperado:**
+  - Se debe gatillar `GameEvents.OnOptionsRevealed` enviando la lista de opciones.
+  - El multiplicador final del turno debe computarse como `WithHelp` (x0.5), aplicando el redondeo a la baja o cercano en el movimiento final.
+
+---
+
+### 15. Evaluación Manual y Desafíos del Game Master (HU-4.8)
+* **Objetivo:** Verificar que las preguntas abiertas detienen la evaluación automática y requieren la interacción manual del GM.
+* **Pasos:**
+  1. Extrae una carta abierta (dificultad 6 o sin opciones múltiples cuyo campo `=` empiece con `[Criterio del GM:`).
+  2. Envía una respuesta por el jugador.
+* **Resultado Esperado:**
+  - La FSM de resolución debe quedar en pausa.
+  - Se debe gatillar el evento `GameEvents.OnGmJudgmentRequired` enviando la respuesta y el criterio de evaluación.
+  - Al pulsar ✅ Correcta o ❌ Incorrecta (gatillando `OnGmJudgmentSubmitted`), la FSM debe reanudarse y aplicar el multiplicador `Perfect` o `Fail` correspondiente.
+
+
