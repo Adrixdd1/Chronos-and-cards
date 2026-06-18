@@ -1,0 +1,117 @@
+Game Design Document (GDD) - Chronos & Cards
+1. Visión General
+Chronos & Cards es un juego de mesa multijugador aumentado (Party Game / Trivia). La capa visual, el sistema de físicas (dado) y el progreso en el tablero se gestionan digitalmente en Unity. El contenido (las preguntas, pistas y respuestas) es dinámico, orientado a datos, y es inyectado por un Game Master (GM) al inicio de la sesión.
+
+2. Modos de Juego y Tablero
+El juego soporta la generación de dos tipos de tableros:
+
+Modo Lineal (Tipo Oca): Una ruta directa de inicio a fin. La longitud es dinámica y configurable por el GM al inicio de la partida (por ejemplo, escalar el tablero para que termine tras un promedio de 16 preguntas resueltas).
+
+Modo Exploración (Multipath): Un tablero en red de nodos tipo laberinto que se va descubriendo, forzando a los jugadores a tomar decisiones tácticas sobre su ruta.
+
+3. Lógica de Turno y Dificultad
+El flujo principal de un jugador es el siguiente:
+
+Lanzamiento: Tira un dado de 6 caras (D6).
+
+Extracción de Carta: El valor del dado define exactamente la dificultad de la carta extraída.
+
+Nivel 1: Muy fácil (ej. Verdadero/Falso).
+
+Nivel 6: Muy difícil (ej. Pregunta Abierta).
+
+Resolución: El jugador debe responder. Durante esta fase puede consumir recursos (Pistas) u Objetos de su inventario.
+
+4. Sistema de Avance (Riesgo / Recompensa)
+El avance de casillas se calcula mediante una ponderación del azar y el desempeño.
+
+Fórmula: Casillas a Avanzar = Valor del Dado * Multiplicador de Desempeño
+
+Multiplicador x1.0 (Respuesta Perfecta): Responde correctamente sin ver opciones múltiples ni pedir pistas.
+
+Multiplicador x0.5 (Respuesta con Ayuda): Responde correctamente habiendo consumido una pista o revelado las opciones (el resultado se redondea).
+
+Multiplicador x0 (Fallo): Respuesta incorrecta. No hay avance (o retrocede, según la casilla/evento).
+
+5. Economía Base y Tipos de Casillas
+Los jugadores gestionan un inventario de Pistas Disponibles. Inician con una cantidad base predefinida por el GM.
+El tablero está compuesto por nodos (casillas) con distintos efectos al caer sobre ellos:
+
+Casilla Neutral: Flujo de turno normal.
+
+Casilla Pista+ (Booster): Suma +1 Pista al inventario.
+
+Casilla Pista- (Trampa): Resta -1 Pista del inventario.
+
+Casilla Evento: Altera temporalmente las reglas (ej. "Siguiente pista gratuita").
+
+Casilla Objeto: El jugador roba una carta del mazo de consumibles y la añade a su inventario.
+
+6. Sistema de Objetos (Consumibles)
+Los jugadores pueden almacenar y utilizar los siguientes objetos según su fase de activación:
+
+Buffs (Utilidad Propia):
+
+Avance sin límites (Overdrive): Uso antes de responder. Permite usar una pista sin sufrir reducción del Multiplicador de Desempeño.
+
+Eco del Tiempo: Uso tras fallar. Permite volver a tirar el dado y sacar una nueva carta, pero obliga a responderla en dificultad máxima (sin pistas).
+
+Debuffs y Combate:
+
+Sabotaje de Opciones: Uso turno rival (tras tirar el dado). Obliga al rival a responder su pregunta como si fuera una pregunta abierta de Nivel 6 (oculta las opciones).
+
+Robo de Pregunta: Uso turno rival (tras fallo). Si el rival falla, el jugador puede intentar responderla para llevarse el avance correspondiente. Si el atacante falla, pierde 1 Pista.
+
+Duelo de Posiciones (Cambio de lugar): Uso turno propio (sustituye el lanzamiento). Desafía a un jugador a una pregunta de Muerte Súbita simultánea.
+
+Si Atacante gana: Intercambian posiciones en el tablero.
+
+Si Defensor gana: Mantiene su posición y roba 1 Pista o 1 Objeto al atacante (si el atacante no tiene, pierde su próximo turno).
+
+Counters (Defensivos):
+
+Reflejo Perfecto (Parry): Uso como Reacción. Anula el efecto de cualquier objeto ofensivo lanzado en contra del jugador y cancela el turno del atacante.
+
+7. Fase de Cierre de Ronda (El Desafío del GM)
+Al finalizar los turnos de todos los jugadores, se activa un estado de concurrencia global:
+
+Mecánica: El GM lanza un reto especial en pantalla. Se activa un sistema First-to-press (el primer jugador en pulsar su botón tiene el derecho a responder). Fallar bloquea al jugador para este reto.
+
+Recompensas Variables: El premio por superar el Desafío del GM puede ser:
+
+Caja de Suministros: +1 Pista y +1 Objeto.
+
+La Pista Dorada: Permite responder un Nivel 6 sin penalización de multiplicador.
+
+Manipulación del Tablero: El jugador puede elegir dos nodos adyacentes de la pista e intercambiarlos de lugar.
+
+Escudo de Inmunidad: Invulnerabilidad a Duelos, Robos y Sabotajes durante la próxima ronda.
+
+8. Arquitectura de Datos y Lógica del Parser (Para el Agente IA)
+El contenido no se compila con el juego. El agente debe implementar un Parser en C# que procese un archivo externo .md cargado por el GM.
+
+Formato Estructural del Markdown:
+
+# [Nivel] : Define la dificultad (1 al 6) y el texto de la pregunta.
+
+> : Define la pista disponible.
+
+- o * : Define las opciones múltiples (si las hay).
+
+= : Define la respuesta correcta o el criterio de evaluación para el GM.
+
+Ejemplo:
+
+Markdown
+# [1] El patrón Singleton permite múltiples instancias de una clase.
+- Verdadero
+- Falso
+= Falso
+9. Directrices de Arquitectura para el Desarrollo
+Para asegurar un ecosistema escalable y modular en Unity, el agente deberá regirse por estrictas prácticas de clean code y principios de diseño antigravity. Esto exige que la lógica de juego mantenga un aislamiento de dominios absoluto:
+
+Desacoplamiento de la UI: La capa visual (animaciones del dado, actualizaciones del tablero y UI de las cartas) debe funcionar únicamente como "oyente" (Observer pattern) de los eventos de estado del núcleo lógico.
+
+Patrón Strategy/Command para Objetos: Cada consumible del inventario debe ser un módulo independiente, encapsulando su propia lógica de activación y validación para evitar saturar el PlayerController.
+
+Gestión Concurrente y FSM: Se requiere una Máquina de Estados Finitos para el flujo por turnos, capaz de ser interrumpida de forma limpia por eventos globales asíncronos (como el Desafío del GM o un Duelo de Posiciones), resolviendo la concurrencia en la entrada de datos (inputs simultáneos).
