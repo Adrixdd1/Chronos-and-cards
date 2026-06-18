@@ -36,6 +36,24 @@ namespace ChronosAndCards.Core
         /// <summary>Se dispara cuando el jugador envía su respuesta desde la UI.</summary>
         public static Action<string> OnAnswerSubmitted;
 
+        // === Contenido ===
+        /// <summary>Se dispara cuando el contenido ha sido cargado y está listo.</summary>
+        public static Action<int> OnContentLoaded; // totalCards
+
+        /// <summary>Se dispara cuando un nivel de dificultad se queda sin cartas.</summary>
+        public static Action<int> OnDeckLevelEmpty; // level
+
+        // === Opciones ===
+        /// <summary>Se dispara cuando el jugador revela las opciones múltiples.</summary>
+        public static Action<List<string>> OnOptionsRevealed;
+
+        // === Evaluación del GM ===
+        /// <summary>Se dispara cuando se requiere la evaluación manual del GM.</summary>
+        public static Action<string, string> OnGmJudgmentRequired; // playerAnswer, criteria
+
+        /// <summary>Se dispara cuando el GM envía su veredicto.</summary>
+        public static Action<bool> OnGmJudgmentSubmitted; // isCorrect
+
         // === Movimiento ===
         /// <summary>Se dispara al mover un jugador en el tablero. Parámetros: jugador, posición origen, posición destino.</summary>
         public static Action<IPlayer, int, int> OnPlayerMoved;
@@ -124,6 +142,11 @@ namespace ChronosAndCards.Core
             OnGameStarted = null;
             OnGameOver = null;
             OnAnswerSubmitted = null;
+            OnContentLoaded = null;
+            OnDeckLevelEmpty = null;
+            OnOptionsRevealed = null;
+            OnGmJudgmentRequired = null;
+            OnGmJudgmentSubmitted = null;
         }
     }
 }

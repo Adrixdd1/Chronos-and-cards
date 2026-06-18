@@ -86,7 +86,7 @@ namespace ChronosAndCards.Gameplay.Dice
 
                 // Si se detiene físicamente (velocidad angular cae bajo umbral)
                 if (_rigidbody.angularVelocity.magnitude < _config.StopThreshold && 
-                    _rigidbody.velocity.magnitude < _config.StopThreshold)
+                    _rigidbody.linearVelocity.magnitude < _config.StopThreshold)
                 {
                     reachedSettle = true;
                     break;

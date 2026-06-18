@@ -18,6 +18,7 @@ namespace ChronosAndCards.Core
         [SerializeField] private BoardManager _boardManager;
         [SerializeField] private ContentManager _contentManager;
         [SerializeField] private DiceRoller _diceRoller;
+        [SerializeField] private ContentLoader _contentLoader;
 
         [Header("Configuraciones del Dado")]
         [SerializeField] private DiceConfig _diceConfig;
@@ -28,6 +29,8 @@ namespace ChronosAndCards.Core
         private IDifficultyMapper _difficultyMapper;
         private AdvanceCalculator _advanceCalculator;
         private TurnContext _turnContext = new TurnContext();
+        private HintSystem _hintSystem;
+        private AnswerEvaluator _answerEvaluator;
 
         private IGameState _currentState;
         private Stack<IGameState> _stateStack = new Stack<IGameState>();
@@ -36,6 +39,15 @@ namespace ChronosAndCards.Core
         private List<IPlayer> _players = new List<IPlayer>();
         private int _currentPlayerIndex = 0;
         private GameContext _gameContext = new GameContext();
+
+        /// <summary>Acceso al ContentLoader.</summary>
+        public ContentLoader ContentLoader => _contentLoader;
+
+        /// <summary>Acceso al HintSystem.</summary>
+        public HintSystem HintSystem => _hintSystem;
+
+        /// <summary>Acceso al AnswerEvaluator.</summary>
+        public AnswerEvaluator AnswerEvaluator => _answerEvaluator;
 
         /// <summary>Acceso al TurnContext compartido.</summary>
         public TurnContext TurnContext => _turnContext;
@@ -85,6 +97,8 @@ namespace ChronosAndCards.Core
             _diceLogic = new DiceLogic();
             _difficultyMapper = new DifficultyMapper(_difficultyMapConfig);
             _advanceCalculator = new AdvanceCalculator();
+            _hintSystem = new HintSystem();
+            _answerEvaluator = new AnswerEvaluator();
         }
 
         private void Start()
