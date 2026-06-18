@@ -1,0 +1,74 @@
+using System.Collections.Generic;
+using ChronosAndCards.Interfaces;
+
+namespace ChronosAndCards.Core
+{
+    /// <summary>
+    /// Implementación concreta de prueba del contrato IPlayer para la Épica 1.
+    /// </summary>
+    public class TestPlayer : IPlayer
+    {
+        private string _playerName;
+        private int _playerIndex;
+        private int _position;
+        private int _hintCount;
+        private List<IItem> _inventory = new List<IItem>();
+        private bool _isSkipNextTurn;
+
+        /// <summary>Constructor para inicializar un jugador de prueba.</summary>
+        public TestPlayer(string name, int index)
+        {
+            _playerName = name;
+            _playerIndex = index;
+            _position = 0;
+            _hintCount = 0;
+            _isSkipNextTurn = false;
+        }
+
+        public string PlayerName => _playerName;
+        public int PlayerIndex => _playerIndex;
+        public int Position => _position;
+        public int HintCount => _hintCount;
+        public IReadOnlyList<IItem> Inventory => _inventory;
+        public bool IsSkipNextTurn => _isSkipNextTurn;
+
+        public void MoveForward(int tiles)
+        {
+            int oldPos = _position;
+            _position += tiles;
+            GameEvents.OnPlayerMoved?.Invoke(this, oldPos, _position);
+        }
+
+        public void MoveToPosition(int pos)
+        {
+            int oldPos = _position;
+            _position = pos;
+            GameEvents.OnPlayerMoved?.Invoke(this, oldPos, _position);
+        }
+
+        public void AddHint(int amount)
+        {
+            _hintCount += amount;
+            GameEvents.OnHintChanged?.Invoke(this, _hintCount);
+        }
+
+        public void AddItem(IItem item)
+        {
+            _inventory.Add(item);
+            GameEvents.OnInventoryChanged?.Invoke(this, item, Data.InventoryAction.Added);
+        }
+
+        public void RemoveItem(IItem item)
+        {
+            if (_inventory.Remove(item))
+            {
+                GameEvents.OnInventoryChanged?.Invoke(this, item, Data.InventoryAction.Removed);
+            }
+        }
+
+        public void SetSkipNextTurn(bool skip)
+        {
+            _isSkipNextTurn = skip;
+        }
+    }
+}
