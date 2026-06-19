@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using ChronosAndCards.Interfaces;
+using ChronosAndCards.Gameplay.Items;
 
 namespace ChronosAndCards.Core
 {
@@ -12,7 +13,6 @@ namespace ChronosAndCards.Core
         private int _playerIndex;
         private int _position;
         private int _hintCount;
-        private List<IItem> _inventory = new List<IItem>();
         private bool _isSkipNextTurn;
 
         /// <summary>Constructor para inicializar un jugador de prueba.</summary>
@@ -23,13 +23,14 @@ namespace ChronosAndCards.Core
             _position = 0;
             _hintCount = 0;
             _isSkipNextTurn = false;
+            Inventory = new PlayerInventory(0);
         }
 
         public string PlayerName => _playerName;
         public int PlayerIndex => _playerIndex;
         public int Position => _position;
         public int HintCount => _hintCount;
-        public IReadOnlyList<IItem> Inventory => _inventory;
+        public PlayerInventory Inventory { get; private set; }
         public bool IsSkipNextTurn => _isSkipNextTurn;
 
         private List<IStatusEffect> _activeEffects = new List<IStatusEffect>();
@@ -76,16 +77,17 @@ namespace ChronosAndCards.Core
 
         public void AddItem(IItem item)
         {
-            _inventory.Add(item);
-            GameEvents.OnInventoryChanged?.Invoke(this, item, Data.InventoryAction.Added);
+            Inventory.AddItem(this, item);
         }
 
         public void RemoveItem(IItem item)
         {
-            if (_inventory.Remove(item))
-            {
-                GameEvents.OnInventoryChanged?.Invoke(this, item, Data.InventoryAction.Removed);
-            }
+            Inventory.RemoveItem(this, item);
+        }
+
+        public bool HasItem<T>() where T : IItem
+        {
+            return Inventory.HasItem<T>();
         }
 
         public void SetSkipNextTurn(bool skip)

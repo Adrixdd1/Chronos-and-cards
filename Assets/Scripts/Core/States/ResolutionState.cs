@@ -171,6 +171,11 @@ namespace ChronosAndCards.Core.States
                 {
                     Debug.Log("ResolutionState: El jugador falló la pregunta. Habilitando ventana AfterFail.");
                     _gameManager.GameContext.CurrentPhase = ItemActivationPhase.AfterFail;
+                    
+                    if (_turnContext != null)
+                    {
+                        _turnContext.FailedThisTurn = true;
+                    }
                 }
 
                 // Emitir evento de resolución

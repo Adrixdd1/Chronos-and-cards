@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using ChronosAndCards.Interfaces;
+using ChronosAndCards.Gameplay.Items;
 
 namespace ChronosAndCards.Core
 {
@@ -21,8 +22,8 @@ namespace ChronosAndCards.Core
         /// <summary>Cantidad de pistas disponibles del jugador.</summary>
         int HintCount { get; }
 
-        /// <summary>Inventario de objetos en posesión del jugador (lista de solo lectura).</summary>
-        IReadOnlyList<IItem> Inventory { get; }
+        /// <summary>Inventario de objetos en posesión del jugador.</summary>
+        PlayerInventory Inventory { get; }
 
         /// <summary>Indica si el jugador debe perder su siguiente turno por penalización.</summary>
         bool IsSkipNextTurn { get; }
@@ -78,6 +79,11 @@ namespace ChronosAndCards.Core
         /// </summary>
         /// <param name="item">Objeto a remover.</param>
         void RemoveItem(IItem item);
+
+        /// <summary>
+        /// Verifica si el jugador tiene al menos un ítem de tipo T.
+        /// </summary>
+        bool HasItem<T>() where T : IItem;
 
         /// <summary>
         /// Define si el jugador tiene la penalización de saltar su siguiente turno.

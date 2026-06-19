@@ -18,23 +18,6 @@ namespace ChronosAndCards.Data
     }
 
     /// <summary>
-    /// Fase en la que un objeto consumible puede activarse.
-    /// </summary>
-    public enum ItemActivationPhase
-    {
-        /// <summary>Antes de responder (ej. Overdrive).</summary>
-        BeforeAnswer,
-        /// <summary>Tras un fallo (ej. Eco del Tiempo).</summary>
-        AfterFail,
-        /// <summary>Durante el turno del rival (ej. Sabotaje, Robo).</summary>
-        RivalTurn,
-        /// <summary>Como reacción a un efecto entrante (ej. Parry).</summary>
-        Reaction,
-        /// <summary>Sustituye el turno normal (ej. Duelo de Posiciones).</summary>
-        ReplaceTurn
-    }
-
-    /// <summary>
     /// Multiplicador de desempeño para la fórmula de avance.
     /// </summary>
     public enum PerformanceMultiplier
@@ -58,19 +41,6 @@ namespace ChronosAndCards.Data
         Exploration
     }
     
-    /// <summary>
-    /// Acción sobre el inventario para eventos.
-    /// </summary>
-    public enum InventoryAction
-    {
-        /// <summary>Objeto añadido al inventario.</summary>
-        Added,
-        /// <summary>Objeto removido del inventario.</summary>
-        Removed,
-        /// <summary>Objeto consumido/usado.</summary>
-        Used
-    }
-
     /// <summary>
     /// Tipo de modificador temporal de reglas que aplica una casilla de Evento.
     /// </summary>

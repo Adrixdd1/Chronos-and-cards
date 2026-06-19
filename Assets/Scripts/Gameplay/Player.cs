@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEngine;
 using ChronosAndCards.Core;
 using ChronosAndCards.Interfaces;
+using ChronosAndCards.Gameplay.Items;
 
 namespace ChronosAndCards.Gameplay
 {
@@ -23,8 +24,8 @@ namespace ChronosAndCards.Gameplay
         /// <summary>Cantidad de pistas disponibles del jugador.</summary>
         public int HintCount { get; private set; }
 
-        /// <summary>Lista de objetos consumibles en posesión del jugador.</summary>
-        public IReadOnlyList<IItem> Inventory => _inventory.AsReadOnly();
+        /// <summary>Inventario del jugador.</summary>
+        public PlayerInventory Inventory { get; }
 
         /// <summary>Indica si el jugador saltará su siguiente turno.</summary>
         public bool IsSkipNextTurn { get; private set; }
@@ -32,7 +33,6 @@ namespace ChronosAndCards.Gameplay
         /// <summary>Lista de efectos de estado activos sobre el jugador.</summary>
         public IReadOnlyList<IStatusEffect> ActiveEffects => _activeEffects.AsReadOnly();
 
-        private readonly List<IItem> _inventory = new();
         private readonly List<IStatusEffect> _activeEffects = new();
 
         /// <summary>
@@ -48,6 +48,7 @@ namespace ChronosAndCards.Gameplay
             Position = 0;
             HintCount = initialHints;
             IsSkipNextTurn = false;
+            Inventory = new PlayerInventory(0);
         }
 
         /// <summary>
@@ -86,7 +87,7 @@ namespace ChronosAndCards.Gameplay
         {
             if (item != null)
             {
-                _inventory.Add(item);
+                Inventory.AddItem(this, item);
             }
         }
 
@@ -97,8 +98,16 @@ namespace ChronosAndCards.Gameplay
         {
             if (item != null)
             {
-                _inventory.Remove(item);
+                Inventory.RemoveItem(this, item);
             }
+        }
+
+        /// <summary>
+        /// Comprueba si el jugador posee un ítem del tipo especificado.
+        /// </summary>
+        public bool HasItem<T>() where T : IItem
+        {
+            return Inventory.HasItem<T>();
         }
 
         /// <summary>

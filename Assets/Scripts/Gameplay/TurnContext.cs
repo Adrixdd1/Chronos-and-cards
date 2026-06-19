@@ -54,6 +54,24 @@ namespace ChronosAndCards.Gameplay
         /// <summary>Indica si un efecto de Sabotaje fue aplicado al jugador (ocultar opciones).</summary>
         public bool IsSabotaged { get; set; }
 
+        /// <summary>Indica si el jugador usó Eco del Tiempo en este turno.</summary>
+        public bool UsedTimeEcho { get; set; }
+
+        /// <summary>Bloquea el uso de pistas (ej. durante Eco del Tiempo).</summary>
+        public bool HintsBlocked { get; set; }
+
+        /// <summary>Bloquea la revelación de opciones (ej. durante Eco del Tiempo).</summary>
+        public bool OptionsBlocked { get; set; }
+
+        /// <summary>Referencia al jugador que saboteó este turno (para Parry).</summary>
+        public IPlayer SabotagedBy { get; set; }
+
+        /// <summary>Indica si el jugador falló la pregunta de este turno.</summary>
+        public bool FailedThisTurn { get; set; }
+
+        /// <summary>Indica si este turno fue cancelado (ej. por un Parry).</summary>
+        public bool TurnCancelled { get; set; }
+
         /// <summary>Reinicia todos los campos para un nuevo turno.</summary>
         public void Reset()
         {
@@ -70,6 +88,12 @@ namespace ChronosAndCards.Gameplay
             DestinationPosition = 0;
             IsOverdriveActive = false;
             IsSabotaged = false;
+            UsedTimeEcho = false;
+            HintsBlocked = false;
+            OptionsBlocked = false;
+            SabotagedBy = null;
+            FailedThisTurn = false;
+            TurnCancelled = false;
         }
     }
 }

@@ -216,4 +216,90 @@ Este documento detalla los escenarios de prueba manuales y los criterios de acep
   - Se debe gatillar el evento `GameEvents.OnGmJudgmentRequired` enviando la respuesta y el criterio de evaluación.
   - Al pulsar ✅ Correcta o ❌ Incorrecta (gatillando `OnGmJudgmentSubmitted`), la FSM debe reanudarse y aplicar el multiplicador `Perfect` o `Fail` correspondiente.
 
+---
 
+### 16. Gestión de Inventario del Jugador (HU-5.1)
+* **Objetivo:** Verificar que los ítems se añaden, eliminan y almacenan correctamente en el inventario del jugador, respetando la capacidad y emitiendo eventos.
+* **Pasos:**
+  1. Otorga un objeto al jugador usando un script de debug (ej. `player.Inventory.AddItem()`).
+  2. Intenta añadir objetos más allá de la capacidad máxima (si está configurada).
+  3. Ejecuta la eliminación de un ítem.
+* **Resultado Esperado:**
+  - `OnInventoryChanged` se dispara al añadir y remover, con la acción correspondiente (`Added` o `Removed`).
+  - La UI del jugador (si está conectada a los eventos) refleja el ítem añadido/eliminado.
+  - Al intentar sobrepasar la capacidad máxima, `AddItem` retorna false y emite un Warning en la Consola.
+
+---
+
+### 17. Configuración y Barajado del Mazo de Objetos (HU-5.2)
+* **Objetivo:** Verificar que el mazo de objetos se instancia correctamente, reparte de forma aleatoria, y se re-baraja o agota según su configuración.
+* **Pasos:**
+  1. Configura un `ItemDeckConfig` con 3 objetos diferentes (con copias 2, 1, 1 respectivamente).
+  2. Usa un script de pruebas para llamar a `ItemDeck.DrawItem()` 4 veces, luego descarta los objetos.
+  3. Llama a `DrawItem()` nuevamente.
+* **Resultado Esperado:**
+  - El mazo debe contener exactamente 4 cartas inicialmente.
+  - Las 4 primeras llamadas extraerán los objetos disponibles.
+  - A la quinta llamada, si `ReshuffleOnEmpty` es true, el mazo debe re-barajar los Descartes y entregar un objeto. Si es false, debe retornar null y disparar `OnDeckEmpty`.
+  - Se debe disparar `GameEvents.OnItemObtained` en cada extracción exitosa.
+
+---
+
+### 18. Restricciones de Activación del ItemEffectExecutor (HU-5.3 & HU-5.10)
+* **Objetivo:** Verificar que el `ItemEffectExecutor` previene el uso de ítems en fases incorrectas del turno o si no se cumplen las condiciones.
+* **Pasos:**
+  1. Añade al jugador un "Overdrive" (fase `BeforeAnswer`) y un "Eco del Tiempo" (fase `AfterFail`).
+  2. Intenta activar el Eco del Tiempo ANTES de lanzar el dado.
+  3. Responde una pregunta e intenta activar el Overdrive.
+* **Resultado Esperado:**
+  - El primer intento debe fallar porque la fase actual no es `AfterFail`. Debe retornar false y emitir `OnItemBlocked`.
+  - El segundo intento debe fallar porque el Overdrive solo sirve en la fase `BeforeAnswer` o si ya no hay pistas disponibles. Retorna false y emite `OnItemBlocked`.
+
+---
+
+### 19. Buffs: Overdrive y Eco del Tiempo (HU-5.4 & HU-5.5)
+* **Objetivo:** Comprobar la lógica individual de los buff que alteran el multiplicador y la FSM.
+* **Pasos:**
+  1. **Overdrive:** Actívalo antes de usar una pista en una pregunta. Usa la pista y responde correctamente.
+  2. **Eco del Tiempo:** Responde mal una pregunta. Activa el Eco. Intenta pedir una pista en el nuevo intento.
+* **Resultado Esperado:**
+  - **Overdrive:** El jugador avanza usando multiplicador de x1.0, ignorando la penalización de pistas de x0.5.
+  - **Eco del Tiempo:** La FSM se interrumpe y retrocede a lanzar el dado. Durante la nueva pregunta, los botones de Pista y Revelar Opciones deben estar bloqueados.
+
+---
+
+### 20. Debuffs: Sabotaje y Robo de Pregunta (HU-5.6 & HU-5.7)
+* **Objetivo:** Verificar las acciones ofensivas indirectas hacia otros jugadores.
+* **Pasos:**
+  1. **Sabotaje:** En el turno del Jugador 2, que el Jugador 1 active Sabotaje.
+  2. **Robo:** En el turno del Jugador 2, espera a que responda incorrectamente. Activa Robo de Pregunta como Jugador 1.
+* **Resultado Esperado:**
+  - **Sabotaje:** Al mostrarse la pregunta del Jugador 2, sus opciones múltiples estarán invisibles (actuará como carta de nivel 6).
+  - **Robo:** Tras el fallo del Jugador 2, se crea un "sub-turno" donde el Jugador 1 ve la misma pregunta. Si acierta, el Jugador 1 avanza los pasos correspondientes. Si falla, el Jugador 1 pierde 1 pista.
+
+---
+
+### 21. Efecto Especial: Duelo de Posiciones (HU-5.8)
+* **Objetivo:** Comprobar la transición al estado `DuelState` y el intercambio de posiciones/robo de ítems.
+* **Pasos:**
+  1. Como Jugador 1, activa el Duelo de Posiciones al inicio de tu turno.
+  2. Selecciona al Jugador 2 como objetivo.
+  3. Ambos jugadores responden la misma pregunta. Simula que el Jugador 1 acierta y Jugador 2 falla.
+  4. Repite el duelo, esta vez el Jugador 2 acierta y el Jugador 1 falla.
+* **Resultado Esperado:**
+  - El turno normal se suspende y entra al modo `DuelState`. Se pide una carta nueva al `ContentManager`.
+  - **Caso Atacante gana:** Jugador 1 y 2 intercambian posiciones en el tablero.
+  - **Caso Defensor gana:** Jugador 2 roba 1 pista o 1 objeto al Jugador 1. Si no tiene nada, el Jugador 1 se salta su próximo turno.
+
+---
+
+### 22. Ventana de Reacción y Parry (HU-5.9)
+* **Objetivo:** Verificar la mecánica de Timer para las reacciones y la cancelación de efectos ofensivos.
+* **Pasos:**
+  1. Otorga al Jugador 2 un ítem ofensivo (ej. Sabotaje). Otorga al Jugador 1 un "Reflejo Perfecto" (Parry).
+  2. El Jugador 2 activa el Sabotaje contra el Jugador 1.
+  3. No hagas nada durante los segundos que dura el timer (ej. 5 seg).
+  4. Repite el ataque, pero esta vez el Jugador 1 activa el Parry antes de que acabe el tiempo.
+* **Resultado Esperado:**
+  - En el primer caso (timeout), expira la ventana y el Sabotaje se aplica normalmente.
+  - En el segundo caso (Parry), el Sabotaje se bloquea antes de aplicarse (`IsCountered = true`), no teniendo ningún efecto, y el turno actual del Jugador 2 (atacante) es cancelado de inmediato.

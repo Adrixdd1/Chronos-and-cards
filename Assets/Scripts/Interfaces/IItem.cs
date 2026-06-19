@@ -1,14 +1,26 @@
+using UnityEngine;
+
 namespace ChronosAndCards.Interfaces
 {
     /// <summary>
-    /// Contrato base para los objetos consumibles en el juego.
+    /// Representa un objeto consumible que el jugador puede almacenar y usar.
+    /// Cada ítem encapsula su efecto mediante el patrón Strategy.
     /// </summary>
     public interface IItem
     {
-        /// <summary>Nombre del objeto.</summary>
+        /// <summary>Nombre visible del ítem.</summary>
         string Name { get; }
 
-        /// <summary>Descripción detallada del efecto del objeto.</summary>
+        /// <summary>Descripción del efecto para la UI.</summary>
         string Description { get; }
+
+        /// <summary>Fase de activación en la que este ítem puede ser usado.</summary>
+        ItemActivationPhase Phase { get; }
+
+        /// <summary>Icono para mostrar en el inventario del jugador.</summary>
+        Sprite Icon { get; }
+
+        /// <summary>Referencia al efecto que se ejecuta al usar este ítem.</summary>
+        IItemEffect Effect { get; }
     }
 }

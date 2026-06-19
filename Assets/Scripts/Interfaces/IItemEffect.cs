@@ -12,13 +12,16 @@ namespace ChronosAndCards.Interfaces
         /// <summary>Fase del ciclo del turno en la que este objeto puede ser activado.</summary>
         ItemActivationPhase ActivationPhase { get; }
 
+        /// <summary>Indica si el efecto es ofensivo (puede ser contrarrestado y requiere Target).</summary>
+        bool IsOffensive { get; }
+
         /// <summary>
         /// Comprueba si el objeto puede ser activado por el jugador dado el contexto actual del juego.
         /// </summary>
         /// <param name="owner">El jugador dueño o instigador del objeto.</param>
         /// <param name="context">El contexto de datos del turno actual.</param>
         /// <returns>True si se cumplen todas las condiciones para su activación.</returns>
-        bool CanActivate(IPlayer owner, GameContext context);
+        bool CanBeActivated(IPlayer owner, GameContext context);
 
         /// <summary>
         /// Ejecuta el efecto del consumible alterando la economía, la posición o las reglas.

@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using ChronosAndCards.Data;
 using ChronosAndCards.Interfaces;
+using ChronosAndCards.Gameplay.Items;
+using ChronosAndCards.Core.States;
 
 namespace ChronosAndCards.Core
 {
@@ -85,11 +87,21 @@ namespace ChronosAndCards.Core
         /// <summary>Se dispara al modificar el inventario de un jugador. Parámetros: jugador, item, tipo de acción.</summary>
         public static Action<IPlayer, IItem, InventoryAction> OnInventoryChanged;
 
-        /// <summary>Se dispara al activar un objeto consumible.</summary>
-        public static Action<IPlayer, IItemEffect> OnItemActivated;
+        /// <summary>Se dispara cuando un jugador obtiene un ítem del mazo.</summary>
+        public static Action<IPlayer, IItem> OnItemObtained;
 
-        /// <summary>Se dispara cuando un objeto es bloqueado (ej. Parry, Inmunidad).</summary>
-        public static Action<IPlayer, IItemEffect> OnItemBlocked;
+        /// <summary>Se dispara cuando un jugador usa un ítem exitosamente.</summary>
+        public static Action<IPlayer, IItem> OnItemUsed;
+
+        /// <summary>Se dispara cuando un ítem es bloqueado (no se puede usar).</summary>
+        public static Action<IPlayer, IItem, string> OnItemBlocked; // reason
+
+        // === Buffs / Debuffs ===
+        /// <summary>Se dispara cuando un buff se aplica al jugador activo.</summary>
+        public static Action<IPlayer, string> OnBuffApplied; // buffName
+
+        /// <summary>Se dispara cuando un debuff se aplica a un rival.</summary>
+        public static Action<IPlayer, IPlayer, string> OnDebuffApplied; // attacker, target, debuffName
 
         // === Desafío del GM ===
         /// <summary>Se dispara al iniciar el desafío del GM.</summary>
@@ -98,12 +110,34 @@ namespace ChronosAndCards.Core
         /// <summary>Se dispara al finalizar el desafío del GM. Parámetro: ganador (null si nadie ganó).</summary>
         public static Action<IPlayer> OnGmChallengeEnded;
 
-        // === Duelo ===
-        /// <summary>Se dispara al iniciar un duelo entre jugadores. Parámetros: atacante, defensor.</summary>
-        public static Action<IPlayer, IPlayer> OnDuelStarted;
+        // === Duelos ===
+        /// <summary>Se dispara cuando se inicia un duelo de posiciones.</summary>
+        public static Action<IPlayer> OnDuelInitiated;
 
-        /// <summary>Se dispara al finalizar un duelo. Parámetro: ganador.</summary>
-        public static Action<IPlayer> OnDuelEnded;
+        /// <summary>Se dispara cuando la UI debe mostrar selección de rival.</summary>
+        public static Action<List<IPlayer>> OnRivalSelectionRequired;
+
+        /// <summary>Se dispara cuando la UI confirma el rival seleccionado.</summary>
+        public static Action<IPlayer> OnRivalSelected;
+
+        /// <summary>Se dispara cuando un jugador envía su respuesta durante un duelo.</summary>
+        public static Action<IPlayer, string> OnDuelAnswerSubmitted;
+
+        /// <summary>Se dispara cuando la pregunta del duelo se presenta a ambos.</summary>
+        public static Action<IPlayer, IPlayer, CardData> OnDuelQuestionPresented;
+
+        /// <summary>Se dispara cuando el duelo se resuelve.</summary>
+        public static Action<IPlayer, IPlayer, DuelResult> OnDuelResolved;
+
+        // === Counters / Reacción ===
+        /// <summary>Se dispara cuando un counter anula un efecto ofensivo.</summary>
+        public static Action<IPlayer, IPlayer, string> OnCounterActivated; // defender, attacker, counterName
+
+        /// <summary>Se dispara cuando se abre una ventana de reacción.</summary>
+        public static Action<PendingOffensiveEffect, float> OnReactionWindowOpened;
+
+        /// <summary>Se dispara cuando la ventana de reacción expira.</summary>
+        public static Action<PendingOffensiveEffect> OnReactionWindowExpired;
 
         // === Partida ===
         /// <summary>Se dispara cuando la partida ha sido configurada y está lista para comenzar.</summary>
@@ -133,12 +167,22 @@ namespace ChronosAndCards.Core
             OnHintChanged = null;
             OnHintRevealed = null;
             OnInventoryChanged = null;
-            OnItemActivated = null;
+            OnItemObtained = null;
+            OnItemUsed = null;
             OnItemBlocked = null;
+            OnBuffApplied = null;
+            OnDebuffApplied = null;
             OnGmChallengeStarted = null;
             OnGmChallengeEnded = null;
-            OnDuelStarted = null;
-            OnDuelEnded = null;
+            OnDuelInitiated = null;
+            OnRivalSelectionRequired = null;
+            OnRivalSelected = null;
+            OnDuelAnswerSubmitted = null;
+            OnDuelQuestionPresented = null;
+            OnDuelResolved = null;
+            OnCounterActivated = null;
+            OnReactionWindowOpened = null;
+            OnReactionWindowExpired = null;
             OnGameStarted = null;
             OnGameOver = null;
             OnAnswerSubmitted = null;
