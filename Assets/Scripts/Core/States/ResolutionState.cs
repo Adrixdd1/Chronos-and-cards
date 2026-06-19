@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using ChronosAndCards.Data;
+using ChronosAndCards.Interfaces;
 using ChronosAndCards.Gameplay;
 
 namespace ChronosAndCards.Core.States

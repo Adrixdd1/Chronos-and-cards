@@ -380,6 +380,9 @@ namespace ChronosAndCards.Gameplay.Board
             {
                 public string Name => "Mock Item";
                 public string Description => "Item generado por stub de BoardManager.";
+                public ChronosAndCards.Interfaces.ItemActivationPhase Phase => ChronosAndCards.Interfaces.ItemActivationPhase.BeforeAnswer;
+                public UnityEngine.Sprite Icon => null;
+                public ChronosAndCards.Interfaces.IItemEffect Effect => null;
             }
 
             public IItem DrawItem() => new MockItem();

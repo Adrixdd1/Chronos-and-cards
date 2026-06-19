@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using ChronosAndCards.Core;
 using ChronosAndCards.Interfaces;
 
 namespace ChronosAndCards.Gameplay.Items

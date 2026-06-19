@@ -10,7 +10,6 @@ namespace ChronosAndCards.Core.States
     {
         private readonly GameManager _gameManager;
         private const int MetaPosition = 20;
-        private bool _evaluationDone;
 
         /// <summary>Constructor que inyecta el GameManager.</summary>
         public NextPlayerState(GameManager gameManager)
@@ -35,7 +34,7 @@ namespace ChronosAndCards.Core.States
             {
                 Debug.Log($"NextPlayerState: ¡El jugador {activePlayer.PlayerName} alcanzó la meta!");
                 _gameManager.TransitionTo(new GameOverState(_gameManager, activePlayer));
-                _evaluationDone = true;
+
                 return;
             }
 
@@ -56,8 +55,6 @@ namespace ChronosAndCards.Core.States
                 Debug.Log($"NextPlayerState: Pasando al siguiente jugador. Nuevo índice: {_gameManager.CurrentPlayerIndex}");
                 _gameManager.TransitionTo(new PlayerTurnState(_gameManager));
             }
-
-            _evaluationDone = true;
         }
 
         public void Tick()

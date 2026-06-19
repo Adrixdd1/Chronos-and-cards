@@ -120,7 +120,7 @@ namespace ChronosAndCards.Tests
 
             // Assert
             Assert.AreEqual(1, _player.Inventory.Count, "El jugador debe recibir 1 item en su inventario.");
-            Assert.AreEqual("Speed Card", _player.Inventory[0].Name);
+            Assert.AreEqual("Speed Card", _player.Inventory.Items[0].Name);
             Assert.IsTrue(inventoryEventFired, "Debería dispararse OnInventoryChanged.");
         }
 
@@ -183,6 +183,9 @@ namespace ChronosAndCards.Tests
         {
             public string Name => "Speed Card";
             public string Description => "Ganas movimiento extra.";
+            public ItemActivationPhase Phase => ItemActivationPhase.None;
+            public UnityEngine.Sprite Icon => null;
+            public IItemEffect Effect => null;
         }
     }
 }

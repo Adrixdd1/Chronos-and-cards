@@ -13,6 +13,9 @@ namespace ChronosAndCards.Tests.Player
         {
             public string Name { get; set; } = "TestItem";
             public string Description { get; set; } = "Test Description";
+            public ItemActivationPhase Phase { get; set; } = ItemActivationPhase.None;
+            public UnityEngine.Sprite Icon { get; set; } = null;
+            public IItemEffect Effect { get; set; } = null;
         }
 
         private class TestStatusEffect : IStatusEffect
@@ -74,7 +77,7 @@ namespace ChronosAndCards.Tests.Player
             player.AddItem(item);
             
             Assert.AreEqual(1, player.Inventory.Count);
-            Assert.AreEqual("Hourglass", player.Inventory[0].Name);
+            Assert.AreEqual("Hourglass", player.Inventory.Items[0].Name);
         }
 
         [Test]

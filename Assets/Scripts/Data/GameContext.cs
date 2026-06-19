@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using ChronosAndCards.Core;
 using ChronosAndCards.Gameplay;
 using ChronosAndCards.Gameplay.Items;
+using ChronosAndCards.Interfaces;
 
 namespace ChronosAndCards.Data
 {

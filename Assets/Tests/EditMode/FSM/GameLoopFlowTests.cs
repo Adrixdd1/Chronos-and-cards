@@ -136,7 +136,7 @@ namespace ChronosAndCards.Tests
 
             var attacker = new TestPlayer("Attacker", 0);
             var defender = new TestPlayer("Defender", 1);
-            var duelState = new DuelState(_gameManager, attacker, defender);
+            var duelState = new DuelState(_gameManager);
 
             // Act (Push Duelo)
             _gameManager.PushState(duelState);

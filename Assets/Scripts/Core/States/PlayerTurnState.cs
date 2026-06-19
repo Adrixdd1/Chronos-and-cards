@@ -1,5 +1,7 @@
 using UnityEngine;
 using ChronosAndCards.Data;
+using ChronosAndCards.Gameplay;
+using ChronosAndCards.Interfaces;
 
 namespace ChronosAndCards.Core.States
 {

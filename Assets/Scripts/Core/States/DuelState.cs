@@ -59,7 +59,7 @@ namespace ChronosAndCards.Core.States
             // Obtener carta para el duelo
             if (_gameManager.ContentManager != null)
             {
-                _duelCard = _gameManager.ContentManager.GetRandomCard(0); // Nivel básico por defecto para duelos
+                _duelCard = _gameManager.ContentManager.DrawCard(1); // Nivel básico por defecto para duelos
             }
             
             _phase = DuelPhase.AwaitingAnswers;
