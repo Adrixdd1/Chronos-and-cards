@@ -141,7 +141,7 @@ namespace ChronosAndCards.Gameplay.Board
         }
 
         /// <summary>
-        /// Retorna las casillas vecinas de salida en modo Exploración.
+        /// Retorna las casillas vecinas de salida (y entrada en lineal).
         /// </summary>
         public IReadOnlyList<ITile> GetAdjacentTiles(ITile current)
         {
@@ -149,7 +149,36 @@ namespace ChronosAndCards.Gameplay.Board
             {
                 return _boardGraph.GetNeighbors(current);
             }
-            return new List<ITile>().AsReadOnly();
+            
+            // Modo Lineal
+            var adjacent = new List<ITile>();
+            int index = _tiles.IndexOf(current);
+            if (index > 0)
+            {
+                adjacent.Add(_tiles[index - 1]);
+            }
+            if (index >= 0 && index < _tiles.Count - 1)
+            {
+                adjacent.Add(_tiles[index + 1]);
+            }
+            return adjacent.AsReadOnly();
+        }
+
+        /// <summary>
+        /// Retorna la lista de casillas que pueden ser intercambiadas.
+        /// Excluye casillas de Inicio (posición 0) y Meta (posición final).
+        /// </summary>
+        public List<ITile> GetSwappableTiles()
+        {
+            var swappable = new List<ITile>();
+            for (int i = 0; i < _tiles.Count; i++)
+            {
+                if (i != 0 && i != TotalTiles - 1)
+                {
+                    swappable.Add(_tiles[i]);
+                }
+            }
+            return swappable;
         }
 
         /// <summary>

@@ -303,3 +303,52 @@ Este documento detalla los escenarios de prueba manuales y los criterios de acep
 * **Resultado Esperado:**
   - En el primer caso (timeout), expira la ventana y el Sabotaje se aplica normalmente.
   - En el segundo caso (Parry), el Sabotaje se bloquea antes de aplicarse (`IsCountered = true`), no teniendo ningún efecto, y el turno actual del Jugador 2 (atacante) es cancelado de inmediato.
+
+---
+
+### 23. Desafío del Game Master y El Primero en Pulsar (HU-6.1 & HU-6.2)
+* **Objetivo:** Verificar la transición al estado `GmChallengeState` y la resolución de concurrencia mediante `FirstToPressManager`.
+* **Pasos:**
+  1. Configura `GmChallengeProbability` a 1.0 (100%).
+  2. Extrae una carta de Nivel 6.
+  3. Espera a que se gatille el evento `OnGmChallengeStarted` y la UI del Desafío.
+  4. Pulsa las teclas asignadas a Jugador 1 y Jugador 2 en diferentes tiempos. Luego pulsa simultáneamente (en el mismo frame).
+* **Resultado Esperado:**
+  - Si la carta es N6, se entra en `GmChallengeState`.
+  - El primer jugador en pulsar es seleccionado y se dispara `OnGmChallengeContestantSelected`.
+  - Si pulsan simultáneamente en el mismo frame (ej. Multi-Touch), el empate se resuelve al azar emitiendo un Warning en consola, y se escoge a un solo contestant.
+
+---
+
+### 24. Aprobación/Rechazo Manual y Recompensas Base (HU-6.3, HU-6.4 & HU-6.5)
+* **Objetivo:** Verificar que el GM evalúa al contestant y el sistema castiga o recompensa en función del veredicto.
+* **Pasos:**
+  1. Inicia un Desafío GM, elige a un contestant.
+  2. Simula que el GM rechaza (isCorrect = false).
+  3. Repite el desafío y simula que el GM aprueba (isCorrect = true).
+* **Resultado Esperado:**
+  - Al rechazar, el contestant recibe el castigo (`SetSkipNextTurn(true)`) y se termina el desafío sin ganador (`OnGmChallengeEndedNoWinner`).
+  - Al aprobar, el `GmRewardDistributor` le otorga una recompensa ponderada al azar (`GrantRandomReward`), lo registra en consola, y finaliza con ganador (`OnGmChallengeEnded`).
+
+---
+
+### 25. Efectos de Estado: Pista Dorada y Escudo de Inmunidad (HU-6.7 & HU-6.8)
+* **Objetivo:** Comprobar el funcionamiento de los efectos de estado temporales.
+* **Pasos:**
+  1. **Pista Dorada:** Añade manualmente el `GoldenHintStatusEffect` a un jugador. En su turno, asegúrate que se enfrenta a una carta de Nivel 6 y pide una pista.
+  2. **Escudo de Inmunidad:** Añade el `ImmunityShieldStatusEffect` al Jugador 1. Trata de que el Jugador 2 lance un Sabotaje (Ofensivo) contra el Jugador 1 en la misma ronda.
+* **Resultado Esperado:**
+  - **Pista Dorada:** El multiplicador NO se reduce por usar pista en esa carta N6, y el efecto se consume inmediatamente después del turno (`IsExpired = true`).
+  - **Escudo de Inmunidad:** El `ItemEffectExecutor` detecta que el Jugador 1 tiene escudo y anula el Sabotaje del Jugador 2. El ítem de Sabotaje se consume sin efecto. Al cambiar de ronda superando la expiración, el escudo se remueve solo.
+
+---
+
+### 26. Recompensa: Manipulación del Tablero (HU-6.9)
+* **Objetivo:** Verificar el flujo interactivo de intercambiar casillas.
+* **Pasos:**
+  1. Otorga al Jugador 1 la recompensa `BoardManipulationReward`.
+  2. Al aplicarse la recompensa, observa la lista de `swappableTiles`.
+  3. Dispara manualmente el evento `OnBoardManipulationCompleted` enviando dos casillas válidas.
+* **Resultado Esperado:**
+  - Las casillas Inicio y Meta nunca deben aparecer en `swappableTiles`.
+  - Al completarse el evento, el `BoardManager` debe intercambiar ambas casillas, emitir `OnBoardModified` y reubicar las posiciones lógicas de los jugadores que estuvieran sobre ellas.

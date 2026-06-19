@@ -4,6 +4,8 @@ using UnityEngine;
 using ChronosAndCards.Core;
 using ChronosAndCards.Data;
 using ChronosAndCards.Interfaces;
+using System.Linq;
+using ChronosAndCards.Gameplay.StatusEffects;
 
 namespace ChronosAndCards.Gameplay.Items
 {
@@ -54,6 +56,17 @@ namespace ChronosAndCards.Gameplay.Items
                 return false;
             }
 
+            // 3.5. Verificar Escudo de Inmunidad en efectos ofensivos
+            if (item.Effect.IsOffensive && context.TargetPlayer != null && HasImmunityShield(context.TargetPlayer))
+            {
+                Debug.Log($"ItemEffectExecutor: {context.TargetPlayer.PlayerName} está protegido por Escudo de Inmunidad. Efecto ofensivo anulado.");
+                GameEvents.OnItemBlocked?.Invoke(owner, item, "Objetivo protegido por Escudo de Inmunidad");
+
+                owner.RemoveItem(item);
+                // NOTA: Si ItemDeck maneja pila de descartes, debería agregarse aquí.
+                return false;
+            }
+
             // Consumir el objeto del inventario
             owner.RemoveItem(item);
             GameEvents.OnItemUsed?.Invoke(owner, item);
@@ -77,6 +90,14 @@ namespace ChronosAndCards.Gameplay.Items
             }
 
             return true;
+        }
+
+        /// <summary>Verifica si el jugador tiene un Escudo de Inmunidad activo.</summary>
+        private bool HasImmunityShield(IPlayer player)
+        {
+            return player.ActiveEffects
+                .OfType<ImmunityShieldStatusEffect>()
+                .Any(e => e.IsActive);
         }
     }
 }

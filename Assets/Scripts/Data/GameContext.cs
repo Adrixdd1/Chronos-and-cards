@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using ChronosAndCards.Core;
 using ChronosAndCards.Gameplay;
 using ChronosAndCards.Gameplay.Items;
+using ChronosAndCards.Gameplay.Board;
 using ChronosAndCards.Interfaces;
 
 namespace ChronosAndCards.Data
@@ -48,6 +49,18 @@ namespace ChronosAndCards.Data
 
         /// <summary>Fase actual del ciclo de activación de ítems en la que se encuentra el juego.</summary>
         public ItemActivationPhase CurrentPhase { get; set; }
+
+        /// <summary>Referencia al ContentManager para extraer retos GM.</summary>
+        public ContentManager ContentManager { get; set; }
+
+        /// <summary>Referencia al ItemDeck para extraer objetos de recompensa.</summary>
+        public ItemDeck ItemDeck { get; set; }
+
+        /// <summary>Referencia al BoardManager para manipulación del tablero.</summary>
+        public BoardManager BoardManager { get; set; }
+
+        /// <summary>Ronda actual de la partida.</summary>
+        public int CurrentRound { get; set; }
 
         // --- Soporte de Sub-Turnos (Duelos / Robos) ---
         private readonly Stack<object> _subTurnStack = new();

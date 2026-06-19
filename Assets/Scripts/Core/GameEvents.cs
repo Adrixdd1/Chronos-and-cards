@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using ChronosAndCards.Data;
 using ChronosAndCards.Interfaces;
 using ChronosAndCards.Gameplay.Items;
+using ChronosAndCards.Gameplay.GmChallenge;
 using ChronosAndCards.Core.States;
 
 namespace ChronosAndCards.Core
@@ -104,11 +105,43 @@ namespace ChronosAndCards.Core
         public static Action<IPlayer, IPlayer, string> OnDebuffApplied; // attacker, target, debuffName
 
         // === Desafío del GM ===
-        /// <summary>Se dispara al iniciar el desafío del GM.</summary>
+        /// <summary>Se dispara al iniciar el desafío del GM con la carta del reto.</summary>
         public static Action<CardData> OnGmChallengeStarted;
 
-        /// <summary>Se dispara al finalizar el desafío del GM. Parámetro: ganador (null si nadie ganó).</summary>
-        public static Action<IPlayer> OnGmChallengeEnded;
+        /// <summary>Se dispara cuando se salta el desafío (sin retos disponibles).</summary>
+        public static Action OnGmChallengeSkipped;
+
+        /// <summary>Se dispara cuando un jugador es seleccionado como contestant.</summary>
+        public static Action<IPlayer, CardData> OnGmChallengeContestantSelected;
+
+        /// <summary>Se dispara cuando un contestant falla y es bloqueado.</summary>
+        public static Action<IPlayer> OnGmChallengeContestantFailed;
+
+        /// <summary>Se dispara al finalizar con ganador.</summary>
+        public static Action<IPlayer, GmRewardType> OnGmChallengeEnded;
+
+        /// <summary>Se dispara al finalizar sin ganador.</summary>
+        public static Action OnGmChallengeEndedNoWinner;
+
+        // === Recompensas del GM ===
+        /// <summary>Se dispara cuando una recompensa es otorgada.</summary>
+        public static Action<IPlayer, GmRewardType> OnGmRewardGranted;
+
+        // === Manipulación del Tablero ===
+        /// <summary>Se dispara al iniciar la selección de casillas.</summary>
+        public static Action<IPlayer, List<ITile>> OnBoardManipulationStarted;
+
+        /// <summary>Se dispara cuando se completa la selección de casillas.</summary>
+        public static Action<ITile, ITile> OnBoardManipulationCompleted;
+
+        // El evento OnBoardModified ya existe, se encuentra en la sección 'Tablero'.
+
+        // === Efectos de Estado ===
+        /// <summary>Se dispara cuando un efecto de estado se aplica a un jugador.</summary>
+        public static Action<IPlayer, IStatusEffect> OnStatusEffectApplied;
+
+        /// <summary>Se dispara cuando un efecto de estado expira.</summary>
+        public static Action<IPlayer, IStatusEffect> OnStatusEffectExpired;
 
         // === Duelos ===
         /// <summary>Se dispara cuando se inicia un duelo de posiciones.</summary>
@@ -173,7 +206,16 @@ namespace ChronosAndCards.Core
             OnBuffApplied = null;
             OnDebuffApplied = null;
             OnGmChallengeStarted = null;
+            OnGmChallengeSkipped = null;
+            OnGmChallengeContestantSelected = null;
+            OnGmChallengeContestantFailed = null;
             OnGmChallengeEnded = null;
+            OnGmChallengeEndedNoWinner = null;
+            OnGmRewardGranted = null;
+            OnBoardManipulationStarted = null;
+            OnBoardManipulationCompleted = null;
+            OnStatusEffectApplied = null;
+            OnStatusEffectExpired = null;
             OnDuelInitiated = null;
             OnRivalSelectionRequired = null;
             OnRivalSelected = null;

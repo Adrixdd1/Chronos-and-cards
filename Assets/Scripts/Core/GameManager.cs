@@ -5,6 +5,8 @@ using ChronosAndCards.Interfaces;
 using ChronosAndCards.Gameplay;
 using ChronosAndCards.Gameplay.Board;
 using ChronosAndCards.Gameplay.Dice;
+using ChronosAndCards.Gameplay.GmChallenge;
+using ChronosAndCards.Gameplay.GmChallenge.Rewards;
 
 namespace ChronosAndCards.Core
 {
@@ -25,12 +27,18 @@ namespace ChronosAndCards.Core
         [SerializeField] private DifficultyMapConfig _difficultyMapConfig;
         [SerializeField] private DicePhysics _dicePhysics;
 
+        [Header("GM Challenge")]
+        [SerializeField] private GmChallengeConfig _gmChallengeConfig;
+        [SerializeField] private GmRewardConfig _gmRewardConfig;
+        [SerializeField] private FirstToPressManager _firstToPressManager;
+
         private DiceLogic _diceLogic;
         private IDifficultyMapper _difficultyMapper;
         private AdvanceCalculator _advanceCalculator;
         private TurnContext _turnContext = new TurnContext();
         private HintSystem _hintSystem;
         private AnswerEvaluator _answerEvaluator;
+        private GmRewardDistributor _gmRewardDistributor;
 
         private IGameState _currentState;
         private Stack<IGameState> _stateStack = new Stack<IGameState>();
@@ -73,6 +81,10 @@ namespace ChronosAndCards.Core
         /// <summary>Acceso al DiceRoller inyectado.</summary>
         public DiceRoller DiceRoller => _diceRoller;
 
+        public GmChallengeConfig GmChallengeConfig => _gmChallengeConfig;
+        public FirstToPressManager FirstToPressManager => _firstToPressManager;
+        public GmRewardDistributor GmRewardDistributor => _gmRewardDistributor;
+
         /// <summary>Lista de jugadores activos en la partida.</summary>
         public List<IPlayer> Players => _players;
 
@@ -99,6 +111,15 @@ namespace ChronosAndCards.Core
             _advanceCalculator = new AdvanceCalculator();
             _hintSystem = new HintSystem();
             _answerEvaluator = new AnswerEvaluator();
+
+            var implementations = new Dictionary<GmRewardType, IGmReward>
+            {
+                { GmRewardType.SupplyCrate, new SupplyCrateReward() },
+                { GmRewardType.GoldenHint, new GoldenHintReward() },
+                { GmRewardType.ImmunityShield, new ImmunityShieldReward() },
+                { GmRewardType.BoardManipulation, new BoardManipulationReward() }
+            };
+            _gmRewardDistributor = new GmRewardDistributor(_gmRewardConfig, implementations);
         }
 
         private void Start()

@@ -21,7 +21,13 @@ namespace ChronosAndCards.Tests.Player
         private class TestStatusEffect : IStatusEffect
         {
             public string Name { get; set; } = "TestEffect";
-            public int RemainingTurns { get; set; } = 3;
+            public string Description { get; set; } = "Test Description";
+            public StatusEffectDuration Duration { get; set; } = StatusEffectDuration.UntilRoundEnds;
+            public bool IsActive { get; set; } = true;
+            public bool IsExpired { get; set; } = false;
+
+            public bool ShouldActivate(TurnContext context) => true;
+            public void ApplyToTurn(TurnContext context) { }
         }
 
         [Test]
