@@ -2,6 +2,7 @@ using UnityEngine;
 using ChronosAndCards.Data;
 using ChronosAndCards.Gameplay.Dice;
 using ChronosAndCards.Gameplay;
+using ChronosAndCards.Interfaces;
 
 namespace ChronosAndCards.Core.States
 {
@@ -15,7 +16,7 @@ namespace ChronosAndCards.Core.States
         private readonly DiceLogic _diceLogic;
         private readonly DicePhysics _dicePhysics;
 
-        private bool _rollCompleted;
+        private IPlayer _currentPlayer;
         private bool _animationComplete;
         private bool _transitionStarted;
         private float _elapsedTime;
@@ -31,7 +32,6 @@ namespace ChronosAndCards.Core.States
         public void Enter()
         {
             Debug.Log("DiceRollState: Enter");
-            _rollCompleted = false;
             _animationComplete = false;
             _transitionStarted = false;
             _elapsedTime = 0f;
@@ -112,9 +112,6 @@ namespace ChronosAndCards.Core.States
             // Emitir evento
             GameEvents.OnDiceRolled?.Invoke(result);
             
-            // Marcar rodaje lógico como completado
-            _rollCompleted = true;
-
             // Iniciar animación física
             if (_dicePhysics != null)
             {

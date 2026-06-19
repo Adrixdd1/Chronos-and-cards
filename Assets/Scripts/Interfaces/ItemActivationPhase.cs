@@ -7,6 +7,9 @@ namespace ChronosAndCards.Interfaces
     /// </summary>
     public enum ItemActivationPhase
     {
+        /// <summary>Fase inactiva o de configuración donde no se pueden usar ítems.</summary>
+        None,
+
         /// <summary>
         /// Antes de responder la pregunta (ej. Overdrive).
         /// El jugador ya tiene la carta pero no ha respondido.

@@ -27,8 +27,8 @@ namespace ChronosAndCards.Core.States
             _gameManager.GameContext.CurrentDiceValue = 0;
             _gameManager.GameContext.CurrentCard = null;
             _gameManager.GameContext.LastResult = Data.PerformanceMultiplier.Fail;
-            _gameManager.GameContext.IsPlayerTurn = false;
-            _gameManager.GameContext.CurrentPhase = Data.ItemActivationPhase.BeforeAnswer;
+            // Establecer fase de setup para el ItemEffectExecutor
+            _gameManager.GameContext.CurrentPhase = ChronosAndCards.Interfaces.ItemActivationPhase.None;
 
             // Inicializar managers
             _gameManager.BoardManager?.Initialize();
